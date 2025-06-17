@@ -128,6 +128,22 @@ black_pieces = [
 all_pieces = white_pieces + black_pieces
 is_occupied = [[False] * 8 for _ in range(8)]
 
+# Track en passant squares and the pawn that can be captured
+en_passant_target = None
+en_passant_pawn = None
+
+
+def check_game_over():
+    white_king = any(isinstance(p, King) and p.colour == "white" for p in all_pieces)
+    black_king = any(isinstance(p, King) and p.colour == "black" for p in all_pieces)
+    if not white_king:
+        print("Checkmate! Black wins")
+        return True
+    if not black_king:
+        print("Checkmate! White wins")
+        return True
+    return False
+
 for piece in all_pieces:
     row, col = piece.get_current_position()
     is_occupied[row][col] = True
@@ -152,7 +168,7 @@ while running:
                 tile_clicked = game.get_tile_from_mouse_pos()
                 if tile_clicked is not None:
                     row, col = tile_clicked
-                    valid_moves = selected_piece.check_valid_moves(is_occupied)
+                    valid_moves = selected_piece.check_valid_moves(is_occupied, en_passant_target, en_passant_pawn)
                     if (row, col) in valid_moves:
                         # Check if there's a piece on the target tile
                         target_piece = None
@@ -162,11 +178,38 @@ while running:
                                 break
                         if target_piece:
                             all_pieces.remove(target_piece)  # Remove the taken piece
-                        # Perform the move
+
+                        # Handle en passant capture
+                        if isinstance(selected_piece, Pawn) and en_passant_target and tile_clicked == en_passant_target and en_passant_pawn and en_passant_pawn.colour != selected_piece.colour:
+                            cap_row, cap_col = en_passant_pawn.get_current_position()
+                            is_occupied[cap_row][cap_col] = False
+                            all_pieces.remove(en_passant_pawn)
+
                         selected_piece_x, selected_piece_y = selected_piece.get_current_position()
                         is_occupied[selected_piece_x][selected_piece_y] = False
                         selected_piece.move(tile_clicked, valid_moves)
                         is_occupied[row][col] = True
+
+                        # Handle pawn promotion
+                        if isinstance(selected_piece, Pawn) and (row == 0 or row == 7):
+                            all_pieces.remove(selected_piece)
+                            if selected_piece.colour == "white":
+                                promoted = Queen(wq_image, (col * size, row * size), "white")
+                            else:
+                                promoted = Queen(bq_image, (col * size, row * size), "black")
+                            all_pieces.append(promoted)
+                            selected_piece = promoted
+
+                        # Update en passant info
+                        if isinstance(selected_piece, Pawn) and abs(selected_piece_x - row) == 2:
+                            en_passant_target = ((selected_piece_x + row) // 2, col)
+                            en_passant_pawn = selected_piece
+                        else:
+                            en_passant_target = None
+                            en_passant_pawn = None
+
+                        if check_game_over():
+                            running = False
 
                     selected_piece = None
 
