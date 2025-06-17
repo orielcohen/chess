@@ -67,8 +67,10 @@ class Game:
         # Define the letters for the columns
         letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
-        # Initialize a list to keep track of whether each tile is occupied
-        is_occupied = [[False for _ in range(8)] for _ in range(8)]
+        # Initialize a board to keep track of which piece occupies each tile.
+        # ``None`` means the tile is empty. Individual pieces will later be
+        # stored in this matrix in ``main.py``.
+        is_occupied = [[None for _ in range(8)] for _ in range(8)]
 
         # Loop through each square on the chess board
         for row in range(8):
@@ -99,7 +101,7 @@ class Game:
                     chess_board.blit(letter_text, (x + square_size - 30, y + square_size - 30))
 
                 # Set is_occupied for this tile
-                is_occupied[row][col] = False  # Initially, no piece is present
+                is_occupied[row][col] = None  # Initially, no piece is present
 
         # Return the chess board surface and is_occupied
         return chess_board, is_occupied

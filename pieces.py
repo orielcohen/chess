@@ -59,17 +59,28 @@ class Pawn(Piece):
         valid_moves = []
         row, col = self.get_current_position()
         direction = -1 if self.colour == "white" else 1
-        if 0 <= row + direction < 8 and not is_occupied[row + direction][col]:
+
+        # Move forward
+        if 0 <= row + direction < 8 and is_occupied[row + direction][col] is None:
             valid_moves.append((row + direction, col))
+
+        # Initial double move
         if (
-                (self.colour == "white" and row == 6)
-                or (self.colour == "black" and row == 1)
-        ) and not is_occupied[row + direction][col] and not is_occupied[row + 2 * direction][col]:
+                (self.colour == "white" and row == 6) or
+                (self.colour == "black" and row == 1)
+        ) and is_occupied[row + direction][col] is None and is_occupied[row + 2 * direction][col] is None:
             valid_moves.append((row + 2 * direction, col))
-        if 0 <= row + direction < 8 and 0 <= col - 1 < 8 and is_occupied[row + direction][col - 1]:
-            valid_moves.append((row + direction, col - 1))
-        if 0 <= row + direction < 8 and 0 <= col + 1 < 8 and is_occupied[row + direction][col + 1]:
-            valid_moves.append((row + direction, col + 1))
+
+        # Captures
+        if 0 <= row + direction < 8 and 0 <= col - 1 < 8:
+            target = is_occupied[row + direction][col - 1]
+            if target is not None and target.colour != self.colour:
+                valid_moves.append((row + direction, col - 1))
+        if 0 <= row + direction < 8 and 0 <= col + 1 < 8:
+            target = is_occupied[row + direction][col + 1]
+            if target is not None and target.colour != self.colour:
+                valid_moves.append((row + direction, col + 1))
+
         return valid_moves
 
 
@@ -80,26 +91,43 @@ class Rook(Piece):
     def check_valid_moves(self, is_occupied):
         valid_moves = []
         row, col = self.get_current_position()
+
         for i in range(row - 1, -1, -1):
-            if not is_occupied[i][col]:
+            target = is_occupied[i][col]
+            if target is None:
                 valid_moves.append((i, col))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((i, col))
                 break
+
         for i in range(row + 1, 8):
-            if not is_occupied[i][col]:
+            target = is_occupied[i][col]
+            if target is None:
                 valid_moves.append((i, col))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((i, col))
                 break
+
         for i in range(col - 1, -1, -1):
-            if not is_occupied[row][i]:
+            target = is_occupied[row][i]
+            if target is None:
                 valid_moves.append((row, i))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((row, i))
                 break
+
         for i in range(col + 1, 8):
-            if not is_occupied[row][i]:
+            target = is_occupied[row][i]
+            if target is None:
                 valid_moves.append((row, i))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((row, i))
                 break
+
         return valid_moves
 
 
@@ -116,8 +144,10 @@ class Knight(Piece):
         ]
         for dr, dc in moves:
             new_row, new_col = row + dr, col + dc
-            if 0 <= new_row < 8 and 0 <= new_col < 8 and not is_occupied[new_row][new_col]:
-                valid_moves.append((new_row, new_col))
+            if 0 <= new_row < 8 and 0 <= new_col < 8:
+                target = is_occupied[new_row][new_col]
+                if target is None or target.colour != self.colour:
+                    valid_moves.append((new_row, new_col))
         return valid_moves
 
 
@@ -130,33 +160,48 @@ class Bishop(Piece):
         row, col = self.get_current_position()
         for i in range(1, 8):
             if row - i >= 0 and col - i >= 0:
-                if not is_occupied[row - i][col - i]:
+                target = is_occupied[row - i][col - i]
+                if target is None:
                     valid_moves.append((row - i, col - i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row - i, col - i))
                     break
             else:
                 break
+
         for i in range(1, 8):
             if row - i >= 0 and col + i < 8:
-                if not is_occupied[row - i][col + i]:
+                target = is_occupied[row - i][col + i]
+                if target is None:
                     valid_moves.append((row - i, col + i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row - i, col + i))
                     break
             else:
                 break
+
         for i in range(1, 8):
             if row + i < 8 and col - i >= 0:
-                if not is_occupied[row + i][col - i]:
+                target = is_occupied[row + i][col - i]
+                if target is None:
                     valid_moves.append((row + i, col - i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row + i, col - i))
                     break
             else:
                 break
+
         for i in range(1, 8):
             if row + i < 8 and col + i < 8:
-                if not is_occupied[row + i][col + i]:
+                target = is_occupied[row + i][col + i]
+                if target is None:
                     valid_moves.append((row + i, col + i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row + i, col + i))
                     break
             else:
                 break
@@ -174,64 +219,88 @@ class Queen(Piece):
         # Diagonal moves
         for i in range(1, 8):
             if row - i >= 0 and col - i >= 0:
-                if not is_occupied[row - i][col - i]:
+                target = is_occupied[row - i][col - i]
+                if target is None:
                     valid_moves.append((row - i, col - i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row - i, col - i))
                     break
             else:
                 break
 
         for i in range(1, 8):
             if row - i >= 0 and col + i < 8:
-                if not is_occupied[row - i][col + i]:
+                target = is_occupied[row - i][col + i]
+                if target is None:
                     valid_moves.append((row - i, col + i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row - i, col + i))
                     break
             else:
                 break
 
         for i in range(1, 8):
             if row + i < 8 and col - i >= 0:
-                if not is_occupied[row + i][col - i]:
+                target = is_occupied[row + i][col - i]
+                if target is None:
                     valid_moves.append((row + i, col - i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row + i, col - i))
                     break
             else:
                 break
 
         for i in range(1, 8):
             if row + i < 8 and col + i < 8:
-                if not is_occupied[row + i][col + i]:
+                target = is_occupied[row + i][col + i]
+                if target is None:
                     valid_moves.append((row + i, col + i))
                 else:
+                    if target.colour != self.colour:
+                        valid_moves.append((row + i, col + i))
                     break
             else:
                 break
 
         # Vertical moves
         for i in range(row - 1, -1, -1):
-            if not is_occupied[i][col]:
+            target = is_occupied[i][col]
+            if target is None:
                 valid_moves.append((i, col))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((i, col))
                 break
 
         for i in range(row + 1, 8):
-            if not is_occupied[i][col]:
+            target = is_occupied[i][col]
+            if target is None:
                 valid_moves.append((i, col))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((i, col))
                 break
 
         # Horizontal moves
         for i in range(col - 1, -1, -1):
-            if not is_occupied[row][i]:
+            target = is_occupied[row][i]
+            if target is None:
                 valid_moves.append((row, i))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((row, i))
                 break
 
         for i in range(col + 1, 8):
-            if not is_occupied[row][i]:
+            target = is_occupied[row][i]
+            if target is None:
                 valid_moves.append((row, i))
             else:
+                if target.colour != self.colour:
+                    valid_moves.append((row, i))
                 break
 
         return valid_moves
@@ -251,6 +320,8 @@ class King(Piece):
         ]
         for dr, dc in moves:
             new_row, new_col = row + dr, col + dc
-            if 0 <= new_row < 8 and 0 <= new_col < 8 and not is_occupied[new_row][new_col]:
-                valid_moves.append((new_row, new_col))
+            if 0 <= new_row < 8 and 0 <= new_col < 8:
+                target = is_occupied[new_row][new_col]
+                if target is None or target.colour != self.colour:
+                    valid_moves.append((new_row, new_col))
         return valid_moves

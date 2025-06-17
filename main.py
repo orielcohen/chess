@@ -126,11 +126,11 @@ black_pieces = [
 ]
 
 all_pieces = white_pieces + black_pieces
-is_occupied = [[False] * 8 for _ in range(8)]
+is_occupied = [[None] * 8 for _ in range(8)]
 
 for piece in all_pieces:
     row, col = piece.get_current_position()
-    is_occupied[row][col] = True
+    is_occupied[row][col] = piece
 
 
 running = True
@@ -155,18 +155,14 @@ while running:
                     valid_moves = selected_piece.check_valid_moves(is_occupied)
                     if (row, col) in valid_moves:
                         # Check if there's a piece on the target tile
-                        target_piece = None
-                        for piece in all_pieces:
-                            if piece.get_current_position() == tile_clicked:
-                                target_piece = piece
-                                break
-                        if target_piece:
+                        target_piece = is_occupied[row][col]
+                        if target_piece is not None:
                             all_pieces.remove(target_piece)  # Remove the taken piece
                         # Perform the move
                         selected_piece_x, selected_piece_y = selected_piece.get_current_position()
-                        is_occupied[selected_piece_x][selected_piece_y] = False
+                        is_occupied[selected_piece_x][selected_piece_y] = None
                         selected_piece.move(tile_clicked, valid_moves)
-                        is_occupied[row][col] = True
+                        is_occupied[row][col] = selected_piece
 
                     selected_piece = None
 
