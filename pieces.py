@@ -43,33 +43,33 @@ class Piece(sprite.Sprite):
             x = location_pressed[1] * size
             y = location_pressed[0] * size
             self.rect.topleft = (x, y)
-            # Additional logic for pawn promotion (if needed)
-            if isinstance(self, Pawn):
-                row, _ = location_pressed
-                if row == 0 or row == 7:
-                    # Handle pawn promotion here (e.g., replace with a queen)
-                    pass
 
 
 class Pawn(Piece):
     def __init__(self, img, position, colour):
         super().__init__(img, position, colour)
 
-    def check_valid_moves(self, is_occupied):
+    def check_valid_moves(self, is_occupied, en_passant_target=None, en_passant_pawn=None):
         valid_moves = []
         row, col = self.get_current_position()
         direction = -1 if self.colour == "white" else 1
+
         if 0 <= row + direction < 8 and not is_occupied[row + direction][col]:
             valid_moves.append((row + direction, col))
+
         if (
                 (self.colour == "white" and row == 6)
                 or (self.colour == "black" and row == 1)
         ) and not is_occupied[row + direction][col] and not is_occupied[row + 2 * direction][col]:
             valid_moves.append((row + 2 * direction, col))
-        if 0 <= row + direction < 8 and 0 <= col - 1 < 8 and is_occupied[row + direction][col - 1]:
-            valid_moves.append((row + direction, col - 1))
-        if 0 <= row + direction < 8 and 0 <= col + 1 < 8 and is_occupied[row + direction][col + 1]:
-            valid_moves.append((row + direction, col + 1))
+
+        for dc in (-1, 1):
+            if 0 <= col + dc < 8:
+                if 0 <= row + direction < 8 and is_occupied[row + direction][col + dc]:
+                    valid_moves.append((row + direction, col + dc))
+                if en_passant_target and en_passant_target == (row + direction, col + dc):
+                    valid_moves.append(en_passant_target)
+
         return valid_moves
 
 
