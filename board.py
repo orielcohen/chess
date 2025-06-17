@@ -48,7 +48,8 @@ h1, h2, h3, h4, h5, h6, h7, h8, = (c_a, r_1), (c_a, r_2), (c_a, r_3), (c_a, r_4)
 
 class Game:
     def __init__(self):
-        self.create_chess_board()
+        # Initialize the board and occupancy matrix when creating the game
+        self.board, self.is_occupied = self.create_chess_board()
 
     def create_chess_board(self):
         # Define the size of the chess board

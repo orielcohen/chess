@@ -76,9 +76,10 @@ wq_image = image.load('Images/w_queen.png')
 bkn_image = image.load('Images/b_knight.png')
 wkn_image = image.load('Images/w_knight.png')
 
+# Initialize the game and chess board
 game = Game()
-# Create the chess board
-board, is_occupied = game.create_chess_board()
+board = game.board
+is_occupied = game.is_occupied
 # Size of squares
 size = 75
 
@@ -126,7 +127,6 @@ black_pieces = [
 ]
 
 all_pieces = white_pieces + black_pieces
-is_occupied = [[None] * 8 for _ in range(8)]
 
 for piece in all_pieces:
     row, col = piece.get_current_position()
